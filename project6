@@ -1,0 +1,41 @@
+# $? = status of previous command
+# $# = argc
+# $@ = all args
+# $1 through $9 = individual args
+# Retrieve file name
+filename=$1;
+if [[ -e $filename ]]; then
+ echo "File name : $filename"
+else
+ echo "File '$filename' does not exist"
+ exit
+fi
+if ! [[ -s $filename ]]; then
+ echo "File $filename is empty, exiting program"
+ exit
+fi              
+# Get line count
+echo "Line count:"
+wc $filename | awk '{print $1;}'
+# Find most repetitive word
+  echo "Most repetitive word(s):"
+tr " " "\n" < $filename | sort | uniq -c | sed "s/^[ \t]*//" | sort -rn > output
+value="$(head -n 1 output | awk '{print $1}')"
+cat output | grep "^${value}" | awk '{print $2;}'
+rm output 
+# Find least repetitive word
+ echo "Least repetitive word(s):"
+ tr " " "\n" < $filename | sort | uniq -c | sed "s/^[ \t]*//" | sort -n > output
+ value="$(head -n 1 output | awk '{print $1}')"
+ cat output | grep "^${value}" | awk '{print $2;}'
+rm output
+echo "Number of words that start and end with D or d:"
+tr " " "\n" < $filename | grep -i '^d.*d$' | wc | awk '{print $1;}'
+echo "Number of words that start with A or a:"
+tr " " "\n" < $filename | grep -i '^a.*' | wc | awk '{print $1;}'
+echo "Number of numeral only words:"
+tr " " "\n" < $filename | grep "^[0-9]\+$" | wc | awk '{print $1;}'           
+echo "Number of mixed words:"
+value1="$(tr " " "\n" < $filename | grep "^[0-9]\+[a-z|A-Z]\+[a-z|A-Z|0-9]*     $" | wc | awk '{print $1;}')"
+value2="$(tr " " "\n" < $filename | grep "^[a-z|A-Z]\+[0-9]\+[a-z|A-Z|0-9]*     $" | wc | awk '{print $1;}')"
+echo $(($value1 + $value2))
